@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract CustomToken is ERC20 {
+    address public originator;
+    bool public isActivated;
+
+    modifier onlyOriginator() {
+        require(msg.sender == originator, "Only the originator can call this function");
+        _;
+    }
+
+    constructor() ERC20("Custom Token", "CTK") {
+        originator = msg.sender;
+    }
+
+    function initialize() external {
+        require(!isActivated, "Already activated");
+        _mint(originator, 400);
+        isActivated = true;
+    }
+
+    function mintTokens(address teller, uint256 length) external onlyOriginator {
+        _mint(teller, length);
+    }
+
+    function burnTokens(uint256 length) external {
+        _burn(msg.sender, length);
+    }
+
+    function transferTo(address teller, uint256 length) external {
+        _transfer(msg.sender, teller, length);
+    }
+}
